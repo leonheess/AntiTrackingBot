@@ -32,10 +32,10 @@ with daemon.DaemonContext():
 
   @bot.message_handler(func=lambda message: True)
   def echo_all(message):
-    text = message.text
+    text = message.text.strip()
     reply = ERROR
 
-    if '.' not in text:
+    if ' ' in text or '.' not in text:
       reply = INVALID
     else:
       try:
