@@ -57,7 +57,7 @@ with daemon.DaemonContext():
     bot.reply_to(message, reply, disable_web_page_preview=True, parse_mode='Markdown')
 
     if str(message.chat.id) != os.getenv('USER_ID'):
-      date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+      date = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
       bot.send_message(os.getenv('LOG_ID'), f'*Time:* {date}\n\n*Message:* `{text}`\n\n*Response:* {reply}', disable_web_page_preview=True, parse_mode='Markdown')
 
   bot.polling()
