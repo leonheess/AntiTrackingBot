@@ -51,7 +51,9 @@ with daemon.DaemonContext():
           url = 'https://m.youtube.com/watch?v=' + text.split('/')[3]
         else:
           url = url.split('?')[0]
-        reply = '`' + (url[:-1] if url.endswith('/') else url) + '`'
+
+        url = url[:-1] if url.endswith('/') else url
+        reply = f'`{url}`\n\nurl'
       except requests.exceptions.MissingSchema:
         reply = INVALID
       except requests.ConnectionError:
