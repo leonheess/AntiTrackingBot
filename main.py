@@ -53,7 +53,7 @@ with daemon.DaemonContext():
           url = url.split('?')[0]
 
         url = url[:-1] if url.endswith('/') else url
-        reply = f'`{url}`\n\n{url}'
+        reply = f'{url}\n\nTap here to copy: `{url}`'
       except requests.exceptions.MissingSchema:
         reply = INVALID
       except requests.ConnectionError:
