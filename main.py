@@ -39,7 +39,12 @@ with daemon.DaemonContext():
       reply = INVALID
     else:
       try:
-        url = get_destination_url(text if text.startswith('http') or '.' not in text else 'http://' + text)
+        if text.startswith('https://open.spotify.com'):
+          url = text
+        else:
+          text = text if text.startswith('http') else 'http://' + text
+          url = get_destination_url(text)
+
         if url.startswith('https://www.amazon'):
           url = url.split('/ref')[0]
         elif 'youtube.com' in url:
