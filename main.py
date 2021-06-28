@@ -39,7 +39,7 @@ with daemon.DaemonContext():
       reply = INVALID
     else:
       try:
-        if text.startswith('https://open.spotify.com'):
+        if text.startswith('https://open.spotify.com') or text.startswith('https://www.instagram.com'):
           url = text
         else:
           text = text if text.startswith('http') else 'http://' + text
