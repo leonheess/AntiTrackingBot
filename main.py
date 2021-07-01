@@ -77,6 +77,11 @@ with daemon.DaemonContext():
     if str(message.chat.id) != os.getenv('USER_ID'):
       date = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
       log_message = f'*Time:* {date}\n\n*Message:* `{text}`\n\n*Response:* {reply}'
-      bot.send_message(os.getenv('LOG_ID'), log_message , disable_web_page_preview=True, parse_mode='Markdown')
+      log_channel = os.getenv('LOG_ID')
+
+      try:
+        bot.send_message(log_channel, log_message , disable_web_page_preview=True, parse_mode='Markdown')
+      except BaseException:
+        bot.send_message(log_channel, log_message , disable_web_page_preview=True)
 
   bot.polling()
