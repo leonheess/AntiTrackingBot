@@ -52,7 +52,7 @@ with daemon.DaemonContext():
 
         if url.startswith('https://www.amazon'):
           parts = url.split('/dp/')
-          url = parts[0] + '/dp/' + parts[1][0:9]
+          url = parts[0] + '/dp/' + parts[1][0:10]
         elif 'm.youtube.com' in url:
           url = 'https://m.youtube.com/watch?v=' + text.split('/')[3]
         elif 'tiktok.com/@' in url:
