@@ -1,6 +1,6 @@
+import daemon
 import os
 import requests
-import daemon
 import dotenv
 import telebot
 from datetime import datetime
@@ -20,7 +20,7 @@ def get_destination_url(url):
     url,
     allow_redirects=True,
     headers={
-      'User-Agent': 'Mozilla/5.0 (Linux; Android 11; SM-A102U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.72 Mobile Safari/537.36'},
+      'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/94.0.4606.52 Mobile/15E148 Safari/604.1'},
   )).url
 
 with daemon.DaemonContext():
@@ -78,10 +78,7 @@ with daemon.DaemonContext():
         bot.reply_to(message, reply, disable_web_page_preview=True, parse_mode='Markdown')
       else:
         bot.reply_to(message, reply, disable_web_page_preview=True)
-    except BaseException as e:
-      print(e)
-      print(reply)
-      print(url_is_copyable)
+    except BaseException:
       bot.reply_to(message, ERROR)
 
     if str(message.chat.id) != os.getenv('USER_ID'):
@@ -92,6 +89,6 @@ with daemon.DaemonContext():
       if url_is_copyable:
         bot.send_message(log_channel, log_message, disable_web_page_preview=True, parse_mode='Markdown')
       else:
-        bot.send_message(log_channel, log_message, disable_web_page_preview=True)
+        bot.send_message(log_channel, log_message.replace('*', '').replace('`', ''), disable_web_page_preview=True)
 
   bot.polling()
