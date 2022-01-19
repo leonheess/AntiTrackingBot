@@ -50,13 +50,12 @@ with daemon.DaemonContext():
           text = text if text.startswith('http') else 'http://' + text
           url = get_destination_url(text)
 
-        if url.startswith('https://www.amazon'):
-          parts = url.split('/dp/')
+        if url.startswith('https://www.amazon') and len(parts := url.split('/dp/')) >= 2:
           url = parts[0] + '/dp/' + parts[1][0:10]
-        elif 'm.youtube.com' in url:
-          url = 'https://m.youtube.com/watch?v=' + text.split('/')[3]
-        elif 'tiktok.com/@' in url:
-          url = 'https://m.tiktok.com/v/' + url.split('/')[5].split('?')[0] + '.html'
+        elif 'm.youtube.com' in url and len(parts := text.split('/')) >= 4:
+          url = 'https://m.youtube.com/watch?v=' + parts[3]
+        elif 'tiktok.com/@' in url and len(parts := url.split('/')) >= 6:
+          url = 'https://m.tiktok.com/v/' + parts[5].split('?')[0] + '.html'
         elif 'google.com/search?q=' in url:
           url = url.split('&')[0]
         else:
