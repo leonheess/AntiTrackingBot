@@ -1,5 +1,5 @@
-import daemon
 import os
+import daemon
 import requests
 import dotenv
 import telebot
@@ -14,14 +14,7 @@ NOCOPY = 'Unfortunately, I couldn\'t create a copyable URL because Telegram does
 
 IMPOSSIBLE_URLS = ['https://open.spotify.com', 'https://www.instagram.com']
 TELEGRAM_BREAKING_CHARS = ['_', '*', '[', ']']
-
-def get_destination_url(url):
-  return (requests.head(
-    url,
-    allow_redirects=True,
-    headers={
-      'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/94.0.4606.52 Mobile/15E148 Safari/604.1'},
-  )).url
+USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/94.0.4606.52 Mobile/15E148 Safari/604.1'
 
 with daemon.DaemonContext():
   dotenv.load_dotenv()
@@ -48,7 +41,7 @@ with daemon.DaemonContext():
           url = text
         else:
           text = text if text.startswith('http') else 'http://' + text
-          url = get_destination_url(text)
+          url = (requests.get(text, allow_redirects=True, headers={ 'User-Agent': USER_AGENT }, timeout=5)).url
 
         if url.startswith('https://www.amazon') and len(parts := url.split('/dp/')) >= 2:
           url = parts[0] + '/dp/' + parts[1][0:10]
@@ -67,7 +60,7 @@ with daemon.DaemonContext():
         reply = f'{formatted_url}\n\n\n{copy_text if url_is_copyable else NOCOPY}'
       except requests.exceptions.MissingSchema:
         reply = INVALID
-      except requests.ConnectionError:
+      except (requests.ConnectionError, requests.Timeout):
         reply = UNREACHABLE
       except BaseException:
         reply = ERROR
