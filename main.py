@@ -14,7 +14,7 @@ NOCOPY = 'Unfortunately, I couldn\'t create a copyable URL because Telegram does
 
 IMPOSSIBLE_URLS = ['https://open.spotify.com', 'https://www.instagram.com']
 TELEGRAM_BREAKING_CHARS = ['_', '*', '[', ']']
-USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/94.0.4606.52 Mobile/15E148 Safari/604.1'
+USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
 
 with daemon.DaemonContext():
   dotenv.load_dotenv()
