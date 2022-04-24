@@ -1,4 +1,3 @@
-
 [Unit]
 Description = Anti-Tracking Bot
 Wants=network.target network-online.target
@@ -6,7 +5,7 @@ After=network.target network-online.target
  
 [Service]
 Type = simple
-ExecStart = python3.9 /home/heess/AntiTrackingBot/main.py
+ExecStart = python3.9 /%%path%%/AntiTrackingBot/main.py
 User = atb 
 Group = atb
 Restart = on-failure 

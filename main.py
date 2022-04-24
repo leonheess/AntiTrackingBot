@@ -4,6 +4,7 @@ import requests
 import dotenv
 import telebot
 from datetime import datetime
+from torrequest import TorRequest
 
 START = 'Hello there! 😊 Send any link, and I try my best to remove all tracking from the link you sent. Give it a try!'
 HELP = 'Send any link, and I try my best to remove all tracking from the link you sent 😊'
@@ -13,6 +14,7 @@ ERROR = 'Unfortunately, an unknown error occurred 😔'
 NOCOPY = 'Unfortunately, I couldn\'t create a copyable URL because Telegram doesn\'t like some characters in the URL 🙄'
 
 IMPOSSIBLE_URLS = ['https://open.spotify.com', 'https://www.instagram.com']
+SCRAPESHIELDED_URLS = ['https://vm.tiktok.com', 'https://tiktok.com']
 TELEGRAM_BREAKING_CHARS = ['_', '*', '[', ']']
 USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
 
@@ -41,7 +43,11 @@ with daemon.DaemonContext():
           url = text
         else:
           text = text if text.startswith('http') else 'http://' + text
-          url = (requests.get(text, allow_redirects=True, headers={ 'User-Agent': USER_AGENT }, timeout=5)).url
+          if any(text.startswith(url) for url in SCRAPESHIELDED_URLS):
+            with TorRequest() as tr:
+              url = tr.get(text).url
+          else:
+            url = (requests.get(text, allow_redirects=True, headers={ 'User-Agent': USER_AGENT }, timeout=5)).url
 
         if url.startswith('https://www.amazon') and len(parts := url.split('/dp/')) >= 2:
           url = parts[0] + '/dp/' + parts[1][0:10]
