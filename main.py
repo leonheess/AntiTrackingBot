@@ -14,9 +14,19 @@ ERROR = 'Unfortunately, an unknown error occurred 😔'
 NOCOPY = 'Unfortunately, I couldn\'t create a copyable URL because Telegram doesn\'t like some characters in the URL 🙄'
 
 IMPOSSIBLE_URLS = ['https://open.spotify.com', 'https://www.instagram.com']
-SCRAPESHIELDED_URLS = ['https://vm.tiktok.com', 'https://tiktok.com']
+SCRAPE_SHIELDED_URLS = ['https://vm.tiktok.com', 'https://tiktok.com']
 TELEGRAM_BREAKING_CHARS = ['_', '*', '[', ']']
 USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
+
+def getDespiteScrapeShield(url, retries):
+  try:
+    with TorRequest() as tr:
+      return tr.get(url).url
+  except OSError:
+    if retries > 0:
+      getDespiteScrapeShield(url, retries-1)
+    else:
+      raise requests.ConnectionError
 
 with daemon.DaemonContext():
   dotenv.load_dotenv()
@@ -43,9 +53,8 @@ with daemon.DaemonContext():
           url = text
         else:
           text = text if text.startswith('http') else 'http://' + text
-          if any(text.startswith(url) for url in SCRAPESHIELDED_URLS):
-            with TorRequest() as tr:
-              url = tr.get(text).url
+          if any(text.startswith(url) for url in SCRAPE_SHIELDED_URLS):
+            url = getDespiteScrapeShield(text, 5)
           else:
             url = (requests.get(text, allow_redirects=True, headers={ 'User-Agent': USER_AGENT }, timeout=5)).url
 
@@ -68,7 +77,8 @@ with daemon.DaemonContext():
         reply = INVALID
       except (requests.ConnectionError, requests.Timeout):
         reply = UNREACHABLE
-      except BaseException:
+      except BaseException as e:
+        print(e)
         reply = ERROR
 
     try:
