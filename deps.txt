@@ -2,4 +2,4 @@ pyTelegramBotAPI==4.3.1
 python-dotenv==0.19.2
 requests==2.27.1
 datetime==4.3
-torrequest=0.1.0
+torrequest==0.1.0

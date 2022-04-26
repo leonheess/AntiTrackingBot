@@ -2,6 +2,8 @@ import os
 import requests
 import dotenv
 import telebot
+import logging
+import sys
 from datetime import datetime
 from torrequest import TorRequest
 
@@ -27,8 +29,19 @@ def getDespiteScrapeShield(url, retries):
     else:
       raise requests.ConnectionError
 
+logger = logging.getLogger('atb')
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter(fmt="%(asctime)s %(name)s.%(levelname)s: %(message)s", datefmt="%Y.%m.%d %H:%M:%S")
+handler = logging.StreamHandler(stream=sys.stdout)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+logger.info('Error logging online')
+
 dotenv.load_dotenv()
 bot = telebot.TeleBot(os.getenv('API_KEY'))
+
+logger.info('Telegram bot online')
 
 @bot.message_handler(commands=['start'])
 def send_start(message):
@@ -76,7 +89,7 @@ def echo_all(message):
     except (requests.ConnectionError, requests.Timeout):
       reply = UNREACHABLE
     except BaseException as e:
-      print(e)
+      logger.error(e)
       reply = ERROR
 
   try:
@@ -84,7 +97,8 @@ def echo_all(message):
       bot.reply_to(message, reply, disable_web_page_preview=True, parse_mode='Markdown')
     else:
       bot.reply_to(message, reply, disable_web_page_preview=True)
-  except BaseException:
+  except BaseException as e:
+    logger.error(e)
     bot.reply_to(message, ERROR)
 
   if str(message.chat.id) != os.getenv('USER_ID'):
