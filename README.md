@@ -8,6 +8,6 @@ https://t.me/AntiTrackingBot
 
 ### Get started
 
-1. `pip install -r deps.txt`'
+1. `pip install -r deps.txt` as atb user
 2. Install tor on your machine
 3. `python3.9 main.py`

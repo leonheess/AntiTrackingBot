@@ -1,17 +1,16 @@
 [Unit]
 Description = Anti-Tracking Bot
-Wants=network.target network-online.target
-After=network.target network-online.target
- 
+Wants = network.target network-online.target
+After = network.target network-online.target
+
 [Service]
-Type = simple
-ExecStart = python3.9 /%%path%%/AntiTrackingBot/main.py
-User = atb 
-Group = atb
-Restart = on-failure 
+User = atb
+WorkingDirectory = /home/atb/AntiTrackingBot
+ExecStart = python3.9 main.py
+Restart = on-failure
 SyslogIdentifier = atb
 RestartSec = 5
 TimeoutStartSec = infinity
- 
+
 [Install]
 WantedBy = multi-user.target

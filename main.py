@@ -18,25 +18,28 @@ IMPOSSIBLE_URLS = ['https://open.spotify.com', 'https://www.instagram.com']
 SCRAPE_SHIELDED_URLS = ['https://vm.tiktok.com', 'https://tiktok.com']
 TELEGRAM_BREAKING_CHARS = ['_', '*', '[', ']']
 USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
+REQUEST_ARGS = { 'allow_redirects': True, 'headers': { 'User-Agent': USER_AGENT, 'Connection': 'keep-alive' }, 'timeout': 5 }
 
 def getDespiteScrapeShield(url, retries):
   try:
     with TorRequest() as tr:
-      return tr.get(url).url
+      tr.reset_identity()
+      return tr.get(url, **REQUEST_ARGS).url
   except OSError:
     if retries > 0:
+      logger.info('Using Tor failed. Retrying ' + str(6-retries) + ' of 5...')
       getDespiteScrapeShield(url, retries-1)
     else:
       raise requests.ConnectionError
 
 logger = logging.getLogger('atb')
 logger.setLevel(logging.INFO)
-formatter = logging.Formatter(fmt="%(asctime)s %(name)s.%(levelname)s: %(message)s", datefmt="%Y.%m.%d %H:%M:%S")
+formatter = logging.Formatter(fmt='%(asctime)s %(name)s.%(levelname)s: %(message)s', datefmt='%Y.%m.%d %H:%M:%S')
 handler = logging.StreamHandler(stream=sys.stdout)
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-logger.info('Error logging online')
+logger.info('Logging online')
 
 dotenv.load_dotenv()
 bot = telebot.TeleBot(os.getenv('API_KEY'))
@@ -54,6 +57,7 @@ def send_help(message):
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
   text = message.text.strip()
+  logger.info('New message: ' + text)
   url_is_copyable = False
 
   if ' ' in text or '.' not in text:
@@ -65,9 +69,12 @@ def echo_all(message):
       else:
         text = text if text.startswith('http') else 'http://' + text
         if any(text.startswith(url) for url in SCRAPE_SHIELDED_URLS):
+          logger.info('Using Tor to circumvent scrape shield...')
           url = getDespiteScrapeShield(text, 5)
         else:
-          url = (requests.get(text, allow_redirects=True, headers={ 'User-Agent': USER_AGENT }, timeout=5)).url
+          url = (requests.get(text, **REQUEST_ARGS)).url
+
+      logger.info('Destination URL determined to be ' + url)
 
       if url.startswith('https://www.amazon') and len(parts := url.split('/dp/')) >= 2:
         url = parts[0] + '/dp/' + parts[1][0:10]
@@ -84,9 +91,13 @@ def echo_all(message):
       copy_text = f'Tap here to copy:\n\n`{formatted_url}`'
       url_is_copyable = not any(char in formatted_url for char in TELEGRAM_BREAKING_CHARS)
       reply = f'{formatted_url}\n\n\n{copy_text if url_is_copyable else NOCOPY}'
+
+      logger.info('Final URL determined to be ' + formatted_url)
     except requests.exceptions.MissingSchema:
+      logger.error('Invalid URL detected')
       reply = INVALID
     except (requests.ConnectionError, requests.Timeout):
+      logger.error('URL could not be reached')
       reply = UNREACHABLE
     except BaseException as e:
       logger.error(e)
